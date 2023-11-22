@@ -31,8 +31,6 @@ app.post("/register", async (req, res) => {
     }
 
     const encryptPassword = await bcrypt.hash(password, 10);
-
-
     const user = await User.create({
       first_name,
       last_name,
@@ -51,21 +49,29 @@ app.post("/register", async (req, res) => {
 })
 
 app.post("/login", async (req, res) => {
-  // get the email and password from forms
-  const { email, password } = req.body;
+  try{ 
+    // get the email and password from forms
+    const { email, password } = req.body;
+    
+    // validate users input
+      if(!(email && password)) {
+        res.send("Inputs required!");
+      }
+        
+    const user = await User.findOne({ email });
   
-  // validate users input
-    if(!(email && password)) {
-      res.send("Inputs required!");
+    if(user && (await bcrypt.compare(password, user.password))) {
+      const token = jwt.sign({user_id: user._id, email}, process.env.TOKEN_KEY, {expiresIn: "1h"});
+
+      user.token = token;
+      res.status(200).json(user)
+    } else{
+      res.status(400).send("Invalid Credentials");
     }
-
-  const existingUser = User.findOne ({ email });
-
-  if(existingUser) {
-    const validatePassword = await bcrypt.compare(password, existingUser.password);
+  } catch(error){
+    console.log("🚀 ~ file: app.js:71 ~ app.post ~ error:", error);
+    res.send("Something went wrong");
   }
-
-  res.send({email, password})
 })
 
 module.exports = app;
