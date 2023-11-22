@@ -4,6 +4,7 @@ require("./config/database").connect();
 const User = require("./model/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const auth = require("./middleware/auth");
 
 const cors = require("cors");
 const multer = require("multer");
@@ -57,7 +58,7 @@ app.post("/login", async (req, res) => {
       if(!(email && password)) {
         res.send("Inputs required!");
       }
-        
+
     const user = await User.findOne({ email });
   
     if(user && (await bcrypt.compare(password, user.password))) {
@@ -74,4 +75,8 @@ app.post("/login", async (req, res) => {
   }
 })
 
+app.post("/dashboard", auth, (req, res) => {
+  res.status(200).send("Welcome to your dashbord");
+  // res.status(200).send("Welcome to your dashbord" + `${res.user.first_name}`);
+})
 module.exports = app;
