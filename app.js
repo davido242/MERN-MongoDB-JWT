@@ -77,6 +77,6 @@ app.post("/login", async (req, res) => {
 
 app.post("/dashboard", auth, (req, res) => {
   res.status(200).send("Welcome to your dashbord");
-  // res.status(200).send("Welcome to your dashbord" + `${res.user.first_name}`);
+  // res.status(200).send("Welcome to your dashbord" + `${req.body.params.first_name}`);
 })
 module.exports = app;
